@@ -530,7 +530,7 @@ export default function App() {
               muted
               loop
               playsInline
-              preload="auto"
+              preload="metadata"
               aria-hidden="true"
               onError={() => setVideoFailed(true)}
             />
