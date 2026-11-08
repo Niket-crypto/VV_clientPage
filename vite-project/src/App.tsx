@@ -14,7 +14,7 @@ import {
 
 type Lang = "uk" | "en"
 
-const HERO_VIDEO = "/hero.mp4"
+const HERO_VIDEO = "/АвтовозКайф.mp4"
 
 const CARD_PHOTOS = [
   "/avtovoz-1-1.jpg",
@@ -347,7 +347,6 @@ export default function App() {
     window.localStorage.setItem("lang", lang)
   }, [lang, t.title])
 
-  // Закрытие модалки по Escape и блокировка скролла страницы
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOrderModalOpen(false)
@@ -409,7 +408,6 @@ export default function App() {
 
   const handlePhoneSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Валидация: очищаем от пробелов, скобок и тире, проверяем на минимум 10 цифр
     const digitsOnly = phoneValue.replace(/\D/g, "")
     if (digitsOnly.length < 10) {
       setPhoneError(t.modal.invalidPhone)
@@ -418,7 +416,6 @@ export default function App() {
 
     setPhoneError("")
     const message = encodeURIComponent(`${t.calc.msg} Телефон: +${digitsOnly}`)
-    // Отправляем прямо в Telegram менеджеру (или заменяем на твой tg-ник/ссылку)
     window.open(`https://t.me/Vv_Evacuator?text=${message}`, "_blank")
     setOrderModalOpen(false)
   }
@@ -552,13 +549,13 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => setOrderModalOpen(true)}
-                  className="inline-flex h-12 cursor-pointer items-center justify-center bg-[var(--accent)] px-8 text-base font-bold text-[var(--accent-foreground)] transition-all hover:bg-yellow-400 active:scale-95 active:brightness-90 select-none shadow-lg shadow-amber-500/20"
+                  className="inline-flex h-12 cursor-pointer items-center justify-center bg-[var(--accent)] px-8 text-base font-bold text-[var(--accent-foreground)] transition-all hover:bg-yellow-400 active:scale-95 active:bg-yellow-400 select-none"
                 >
                   {t.hero.primary} <ArrowRight className="ml-2 h-4 w-4" />
                 </button>
                 <a
                   href="#calculator"
-                  className="inline-flex h-12 cursor-pointer items-center justify-center border-2 border-white bg-transparent px-8 text-base font-bold text-white transition-all hover:bg-white hover:text-black active:scale-95 select-none"
+                  className="inline-flex h-12 cursor-pointer items-center justify-center border-2 border-white bg-transparent px-8 text-base font-bold text-white transition-all hover:bg-white hover:text-black active:scale-95 active:bg-white active:text-black select-none"
                 >
                   {t.hero.secondary}
                 </a>
@@ -830,15 +827,12 @@ export default function App() {
           aria-labelledby="modal-title"
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
         >
-          {/* Размытый фон */}
           <div
-            className="fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity"
+            className="fixed inset-0 bg-black/75 transition-opacity"
             onClick={() => setOrderModalOpen(false)}
           />
 
-          {/* Карточка модалки */}
           <div className="relative w-full max-w-lg rounded-3xl border border-white/10 bg-[#121214] p-6 text-white shadow-2xl sm:p-8">
-            {/* Кнопка закрытия (крестик) */}
             <button
               type="button"
               onClick={() => setOrderModalOpen(false)}
@@ -895,7 +889,7 @@ export default function App() {
 
               <button
                 type="submit"
-                className="flex h-14 w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-[var(--accent)] text-base font-bold text-black transition-all hover:bg-yellow-400 active:scale-95 active:brightness-90 select-none shadow-lg shadow-amber-500/20"
+                className="flex h-14 w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-[var(--accent)] text-base font-bold text-black transition-all hover:bg-yellow-400 active:scale-95 active:bg-yellow-400 select-none"
               >
                 <Send className="h-4 w-4" />
                 {t.modal.submit}
