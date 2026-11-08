@@ -1,0 +1,134 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Inter', sans-serif;
+  --font-display: 'Space Grotesk', sans-serif;
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #111111;
+  --card: #f4f4f5;
+  --card-foreground: #111111;
+  --primary: #111111;
+  --primary-foreground: #ffffff;
+  --accent: #eab308; 
+  --accent-foreground: #111111;
+  --border: #e4e4e7;
+  --radius: 0px; /* Brutalist/Minimalist sharp edges */
+}
+
+@layer base {
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+}
+
+/* Hide scrollbar for carousels but allow scrolling */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+@keyframes driveTruck {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100vw);
+    opacity: 0;
+  }
+}
+
+@keyframes towTruckPass {
+  0% {
+    transform: translateX(-250px);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  92% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100vw);
+    opacity: 0;
+  }
+}
+
+@keyframes revealAfterTruck {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+    filter: blur(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+.animate-tow-truck {
+  
+  animation: towTruckPass 2.8s cubic-bezier(0.35, 0, 0.25, 1) forwards;
+}
+
+.animate-stat-reveal {
+  animation: revealAfterTruck 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@property --border-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.gradient-border {
+  padding: 3px;
+  border-radius: calc(1.5rem + 3px);
+  background: conic-gradient(
+    from var(--border-angle),
+    var(--accent),
+    #111111,
+    var(--accent),
+    #111111,
+    var(--accent)
+  );
+  animation: border-spin 5s linear infinite;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@keyframes border-spin {
+  to {
+    --border-angle: 360deg;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gradient-border {
+    animation: none;
+  }
+}
