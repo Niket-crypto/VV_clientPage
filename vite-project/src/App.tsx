@@ -6,13 +6,15 @@ import {
   Film,
   Image as ImageIcon,
   Menu,
+  Phone,
+  Send,
   Star,
   X,
 } from "lucide-react"
 
 type Lang = "uk" | "en"
 
-const HERO_VIDEO = "/АвтовозКайф.mp4"
+const HERO_VIDEO = "/hero.mp4"
 
 const CARD_PHOTOS = [
   "/avtovoz-1-1.jpg",
@@ -37,6 +39,15 @@ const dict = {
       primary: "Оформити заявку",
       secondary: "Отримати розрахунок",
       rating: "Рейтинг довіри",
+    },
+    modal: {
+      title: "Швидка заявка на перевезення",
+      subtitle: "Залиште свій номер телефону, і наш логіст зв'яжеться з вами протягом 10 хвилин.",
+      phoneLabel: "Номер телефону",
+      phonePlaceholder: "+380 (__) ___-__-__",
+      submit: "Надіслати заявку",
+      invalidPhone: "Будь ласка, введіть коректний номер телефону",
+      successMsg: "Дякуємо! Заявку прийнято, зараз перенаправляємо...",
     },
     pricing: {
       title: "Тарифи на доставку авто",
@@ -162,6 +173,15 @@ const dict = {
       primary: "Submit a request",
       secondary: "Get a quote",
       rating: "Trust rating",
+    },
+    modal: {
+      title: "Quick transport request",
+      subtitle: "Leave your phone number and our logistics specialist will contact you within 10 minutes.",
+      phoneLabel: "Phone number",
+      phonePlaceholder: "+380 (__) ___-__-__",
+      submit: "Send request",
+      invalidPhone: "Please enter a valid phone number",
+      successMsg: "Thank you! Request received, redirecting...",
     },
     pricing: {
       title: "Car delivery rates",
@@ -307,10 +327,12 @@ function Logo() {
 export default function App() {
   const [lang, setLang] = useState<Lang>(getInitialLang)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [orderModalOpen, setOrderModalOpen] = useState(false)
+  const [phoneValue, setPhoneValue] = useState("+380 ")
+  const [phoneError, setPhoneError] = useState("")
   const [carrier, setCarrier] = useState<CarrierType>("economy")
   const [videoFailed, setVideoFailed] = useState(!HERO_VIDEO)
 
-  // Состояния видимости трёх секций (вместо внешних хуков)
   const [fleetVisible, setFleetVisible] = useState(false)
   const [pricingVisible, setPricingVisible] = useState(false)
   const [aboutVisible, setAboutVisible] = useState(false)
@@ -325,7 +347,23 @@ export default function App() {
     window.localStorage.setItem("lang", lang)
   }, [lang, t.title])
 
-  // Единый встроенный IntersectionObserver без внешних файлов и рефов
+  // Закрытие модалки по Escape и блокировка скролла страницы
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOrderModalOpen(false)
+    }
+    if (orderModalOpen) {
+      document.body.style.overflow = "hidden"
+      window.addEventListener("keydown", handleKeyDown)
+    } else {
+      document.body.style.overflow = ""
+    }
+    return () => {
+      document.body.style.overflow = ""
+      window.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [orderModalOpen])
+
   useEffect(() => {
     const Observer = new IntersectionObserver(
       (entries) => {
@@ -369,6 +407,22 @@ export default function App() {
     document.getElementById("calculator")?.scrollIntoView({ behavior: "smooth" })
   }
 
+  const handlePhoneSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    // Валидация: очищаем от пробелов, скобок и тире, проверяем на минимум 10 цифр
+    const digitsOnly = phoneValue.replace(/\D/g, "")
+    if (digitsOnly.length < 10) {
+      setPhoneError(t.modal.invalidPhone)
+      return
+    }
+
+    setPhoneError("")
+    const message = encodeURIComponent(`${t.calc.msg} Телефон: +${digitsOnly}`)
+    // Отправляем прямо в Telegram менеджеру (или заменяем на твой tg-ник/ссылку)
+    window.open(`https://t.me/Vv_Evacuator?text=${message}`, "_blank")
+    setOrderModalOpen(false)
+  }
+
   const langSwitch = (
     <div
       role="group"
@@ -381,10 +435,10 @@ export default function App() {
           type="button"
           onClick={() => setLang(l)}
           aria-pressed={lang === l}
-          className={`h-full px-3 uppercase transition-colors ${
+          className={`h-full px-3 uppercase transition-colors active:scale-95 ${
             lang === l
               ? "bg-[var(--primary)] text-[var(--primary-foreground)]"
-              : "hover:bg-gray-50"
+              : "hover:bg-gray-50 active:bg-gray-100"
           }`}
         >
           {l === "uk" ? "UA" : "EN"}
@@ -411,7 +465,7 @@ export default function App() {
               <a
                 key={l.href}
                 href={l.href}
-                className="transition-colors hover:text-[var(--accent)]"
+                className="transition-colors hover:text-[var(--accent)] active:text-[var(--accent)]"
               >
                 {l.label}
               </a>
@@ -421,13 +475,13 @@ export default function App() {
             {langSwitch}
             <a
               href="#calculator"
-              className="hidden h-10 items-center justify-center bg-[var(--primary)] px-6 text-sm font-medium text-[var(--primary-foreground)] transition-colors hover:bg-gray-900 md:inline-flex"
+              className="hidden h-10 items-center justify-center bg-[var(--primary)] px-6 text-sm font-medium text-[var(--primary-foreground)] transition-colors hover:bg-gray-900 active:scale-95 active:bg-black md:inline-flex"
             >
               {t.cta}
             </a>
             <button
               type="button"
-              className="p-2 md:hidden"
+              className="p-2 transition-transform active:scale-90 md:hidden"
               aria-label={menuOpen ? t.close : t.menu}
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen((v) => !v)}
@@ -451,7 +505,7 @@ export default function App() {
                   key={l.href}
                   href={l.href}
                   onClick={() => setMenuOpen(false)}
-                  className="border-b border-[var(--border)] py-3 text-sm font-medium"
+                  className="border-b border-[var(--border)] py-3 text-sm font-medium active:text-[var(--accent)]"
                 >
                   {l.label}
                 </a>
@@ -459,7 +513,7 @@ export default function App() {
               <a
                 href="#calculator"
                 onClick={() => setMenuOpen(false)}
-                className="my-4 inline-flex h-11 items-center justify-center bg-[var(--primary)] text-sm font-medium text-[var(--primary-foreground)]"
+                className="my-4 inline-flex h-11 items-center justify-center bg-[var(--primary)] text-sm font-medium text-[var(--primary-foreground)] active:scale-95"
               >
                 {t.cta}
               </a>
@@ -473,13 +527,13 @@ export default function App() {
         <section className="relative isolate overflow-hidden bg-[#0b0b0c] text-white">
           {!videoFailed && (
             <video
-              className="absolute inset-0 -z-20 h-full w-full object-cover"
+              className="absolute inset-0 -z-20 h-full w-full object-cover will-change-transform"
               src={HERO_VIDEO}
               autoPlay
               muted
               loop
               playsInline
-              preload="metadata"
+              preload="auto"
               aria-hidden="true"
               onError={() => setVideoFailed(true)}
             />
@@ -497,13 +551,14 @@ export default function App() {
               <div className="flex flex-col gap-4 sm:flex-row">
                 <button
                   type="button"
-                  className="inline-flex h-12 items-center justify-center bg-[var(--accent)] px-8 text-base font-bold text-[var(--accent-foreground)] transition-colors hover:bg-yellow-400"
+                  onClick={() => setOrderModalOpen(true)}
+                  className="inline-flex h-12 cursor-pointer items-center justify-center bg-[var(--accent)] px-8 text-base font-bold text-[var(--accent-foreground)] transition-all hover:bg-yellow-400 active:scale-95 active:brightness-90 select-none shadow-lg shadow-amber-500/20"
                 >
                   {t.hero.primary} <ArrowRight className="ml-2 h-4 w-4" />
                 </button>
                 <a
                   href="#calculator"
-                  className="inline-flex h-12 items-center justify-center border-2 border-white bg-transparent px-8 text-base font-bold text-white transition-colors hover:bg-white hover:text-black"
+                  className="inline-flex h-12 cursor-pointer items-center justify-center border-2 border-white bg-transparent px-8 text-base font-bold text-white transition-all hover:bg-white hover:text-black active:scale-95 select-none"
                 >
                   {t.hero.secondary}
                 </a>
@@ -573,7 +628,7 @@ export default function App() {
                       }
                     }}
                     style={{ transitionDelay: `${i * 120}ms` }}
-                    className={`gradient-border cursor-pointer transition-all duration-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/70 ${
+                    className={`gradient-border cursor-pointer transition-all duration-700 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/70 ${
                       fleetVisible
                         ? "translate-y-0 opacity-100"
                         : "translate-y-10 opacity-0"
@@ -656,7 +711,7 @@ export default function App() {
                   <div
                     key={row.route}
                     style={{ transitionDelay: `${idx * 45}ms` }}
-                    className={`flex items-center justify-between gap-4 rounded-full border-2 border-[var(--accent)] bg-black px-6 py-3 text-white transition-all duration-500 sm:px-8 sm:py-4 ${
+                    className={`flex items-center justify-between gap-4 rounded-full border-2 border-[var(--accent)] bg-black px-6 py-3 text-white transition-all duration-500 active:scale-[0.98] sm:px-8 sm:py-4 ${
                       pricingVisible
                         ? "translate-x-0 opacity-100"
                         : "-translate-x-8 opacity-0"
@@ -767,6 +822,89 @@ export default function App() {
         </div>
       </section>
 
+      {/* ===== МОДАЛКА: Оформити заявку ===== */}
+      {orderModalOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-title"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        >
+          {/* Размытый фон */}
+          <div
+            className="fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity"
+            onClick={() => setOrderModalOpen(false)}
+          />
+
+          {/* Карточка модалки */}
+          <div className="relative w-full max-w-lg rounded-3xl border border-white/10 bg-[#121214] p-6 text-white shadow-2xl sm:p-8">
+            {/* Кнопка закрытия (крестик) */}
+            <button
+              type="button"
+              onClick={() => setOrderModalOpen(false)}
+              className="absolute right-5 top-5 flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-gray-300 transition-all hover:bg-white/20 active:scale-90"
+              aria-label={t.close}
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            <div className="mb-6">
+              <span className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-[var(--accent)]/15 px-3 py-1 text-xs font-bold uppercase tracking-wider text-[var(--accent)]">
+                <Phone className="h-3.5 w-3.5" />
+                Vv_Evacuator
+              </span>
+              <h3 id="modal-title" className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+                {t.modal.title}
+              </h3>
+              <p className="mt-2 text-sm text-gray-400">
+                {t.modal.subtitle}
+              </p>
+            </div>
+
+            <form onSubmit={handlePhoneSubmit} className="space-y-4">
+              <div>
+                <label htmlFor="phone-input" className="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-300">
+                  {t.modal.phoneLabel}
+                </label>
+                <div className="relative">
+                  <input
+                    id="phone-input"
+                    type="tel"
+                    inputMode="tel"
+                    autoFocus
+                    required
+                    value={phoneValue}
+                    onChange={(e) => {
+                      setPhoneValue(e.target.value)
+                      if (phoneError) setPhoneError("")
+                    }}
+                    placeholder={t.modal.phonePlaceholder}
+                    className={`h-14 w-full rounded-2xl border bg-black/50 px-4 text-lg font-semibold text-white placeholder-gray-500 transition-colors focus:outline-none ${
+                      phoneError
+                        ? "border-red-500 focus:border-red-500"
+                        : "border-white/20 focus:border-[var(--accent)]"
+                    }`}
+                  />
+                </div>
+                {phoneError && (
+                  <p className="mt-2 text-xs font-semibold text-red-400">
+                    {phoneError}
+                  </p>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                className="flex h-14 w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-[var(--accent)] text-base font-bold text-black transition-all hover:bg-yellow-400 active:scale-95 active:brightness-90 select-none shadow-lg shadow-amber-500/20"
+              >
+                <Send className="h-4 w-4" />
+                {t.modal.submit}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
       <footer className="bg-[var(--background)] py-12">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 sm:px-6 md:flex-row lg:px-8">
           <div className="flex items-center gap-3">
@@ -776,10 +914,10 @@ export default function App() {
             </span>
           </div>
           <div className="flex gap-6 text-sm text-gray-600">
-            <a href="#" className="hover:text-black">
+            <a href="#" className="hover:text-black active:text-black">
               {t.footer.terms}
             </a>
-            <a href="#" className="hover:text-black">
+            <a href="#" className="hover:text-black active:text-black">
               {t.footer.privacy}
             </a>
           </div>
