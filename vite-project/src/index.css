@@ -15,8 +15,8 @@
   --primary-foreground: #ffffff;
   --accent: #eab308; 
   --accent-foreground: #111111;
-  --border: #e4e4e7;
-  --radius: 0px; /* Brutalist/Minimalist sharp edges */
+  --border: #e7e7e4;
+  --radius: 0px; 
 }
 
 @layer base {

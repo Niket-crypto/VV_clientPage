@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react"
 import DeliveryCalculator from "./DeliveryCalculator"
 import type { CarrierType } from "./calculateDelivery"
+import { sendTelegramMessage } from "./Utils/sendTelegram"
 import {
   ArrowRight,
   Film,
@@ -41,13 +42,17 @@ const dict = {
       rating: "Рейтинг довіри",
     },
     modal: {
-      title: "Швидка заявка на перевезення",
-      subtitle: "Залиште свій номер телефону, і наш логіст зв'яжеться з вами протягом 10 хвилин.",
+    title: "Швидка заявка на перевезення",
+      subtitle: "Залиште свої контакти, і наш логіст зв'яжеться з вами протягом 10 хвилин.",
+      nameLabel: "Як вас звати?",
+      namePlaceholder: "Наприклад, Олександр",
       phoneLabel: "Номер телефону",
       phonePlaceholder: "+380 (__) ___-__-__",
       submit: "Надіслати заявку",
+      sending: "Відправляємо...",
       invalidPhone: "Будь ласка, введіть коректний номер телефону",
-      successMsg: "Дякуємо! Заявку прийнято, зараз перенаправляємо...",
+      successMsg: "Дякуємо! Заявку прийнято, ми зв'яжемося з вами найближчим часом.",
+      errorMsg: "Помилка відправки. Спробуйте ще раз або зателефонуйте нам.",
     },
     pricing: {
       title: "Тарифи на доставку авто",
@@ -176,12 +181,16 @@ const dict = {
     },
     modal: {
       title: "Quick transport request",
-      subtitle: "Leave your phone number and our logistics specialist will contact you within 10 minutes.",
+      subtitle: "Leave your details and our logistics specialist will contact you within 10 minutes.",
+      nameLabel: "Your name",
+      namePlaceholder: "e.g., Alex",
       phoneLabel: "Phone number",
       phonePlaceholder: "+380 (__) ___-__-__",
       submit: "Send request",
+      sending: "Sending...",
       invalidPhone: "Please enter a valid phone number",
-      successMsg: "Thank you! Request received, redirecting...",
+      successMsg: "Thank you! Request received, we will contact you shortly.",
+      errorMsg: "Failed to send. Please try again.",
     },
     pricing: {
       title: "Car delivery rates",
@@ -330,9 +339,11 @@ export default function App() {
   const [orderModalOpen, setOrderModalOpen] = useState(false)
   const [phoneValue, setPhoneValue] = useState("+380 ")
   const [phoneError, setPhoneError] = useState("")
+  const [clientName, setClientName] = useState("")
+  const [submitSuccess, setSubmitSuccess] = useState(false)
   const [carrier, setCarrier] = useState<CarrierType>("economy")
   const [videoFailed, setVideoFailed] = useState(!HERO_VIDEO)
-
+  const [isSending, setIsSending] = useState(false)
   const [fleetVisible, setFleetVisible] = useState(false)
   const [pricingVisible, setPricingVisible] = useState(false)
   const [aboutVisible, setAboutVisible] = useState(false)
@@ -406,8 +417,10 @@ export default function App() {
     document.getElementById("calculator")?.scrollIntoView({ behavior: "smooth" })
   }
 
-  const handlePhoneSubmit = (e: React.FormEvent) => {
+ const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (isSending) return
+
     const digitsOnly = phoneValue.replace(/\D/g, "")
     if (digitsOnly.length < 10) {
       setPhoneError(t.modal.invalidPhone)
@@ -415,9 +428,31 @@ export default function App() {
     }
 
     setPhoneError("")
-    const message = encodeURIComponent(`${t.calc.msg} Телефон: +${digitsOnly}`)
-    window.open(`https://t.me/Vv_Evacuator?text=${message}`, "_blank")
-    setOrderModalOpen(false)
+    setIsSending(true)
+
+    const cleanName = clientName.trim() || "Не вказано"
+    const message = [
+      `<b>🚨 Нова заявка з сайту!</b>`,
+      `<b>👤 Ім'я:</b> ${cleanName}`,
+      `<b>📞 Телефон:</b> +${digitsOnly}`,
+      `<b>🚛 Обраний тип:</b> ${t.calc.carrierOptions[carrier].name}`,
+      `<b>🕒 Час:</b> ${new Date().toLocaleString("uk-UA")}`,
+    ].join("\n")
+
+    const ok = await sendTelegramMessage(message)
+    setIsSending(false)
+
+    if (ok) {
+      setSubmitSuccess(true)
+      setClientName("")
+      setPhoneValue("+380 ")
+      setTimeout(() => {
+        setSubmitSuccess(false)
+        setOrderModalOpen(false)
+      }, 2000)
+    } else {
+      setPhoneError(t.modal.errorMsg)
+    }
   }
 
   const langSwitch = (
@@ -432,11 +467,10 @@ export default function App() {
           type="button"
           onClick={() => setLang(l)}
           aria-pressed={lang === l}
-          className={`h-full px-3 uppercase transition-colors active:scale-95 ${
-            lang === l
-              ? "bg-[var(--primary)] text-[var(--primary-foreground)]"
-              : "hover:bg-gray-50 active:bg-gray-100"
-          }`}
+          className={`h-full px-3 uppercase transition-colors active:scale-95 ${lang === l
+            ? "bg-[var(--primary)] text-[var(--primary-foreground)]"
+            : "hover:bg-gray-50 active:bg-gray-100"
+            }`}
         >
           {l === "uk" ? "UA" : "EN"}
         </button>
@@ -600,11 +634,10 @@ export default function App() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="rounded-3xl bg-[var(--primary)] p-3 sm:p-6">
               <h2
-                className={`mb-4 flex items-center gap-3 px-1 font-display text-2xl font-bold text-white transition-all duration-700 sm:mb-6 sm:text-3xl ${
-                  fleetVisible
-                    ? "translate-y-0 opacity-100"
-                    : "translate-y-6 opacity-0"
-                }`}
+                className={`mb-4 flex items-center gap-3 px-1 font-display text-2xl font-bold text-white transition-all duration-700 sm:mb-6 sm:text-3xl ${fleetVisible
+                  ? "translate-y-0 opacity-100"
+                  : "translate-y-6 opacity-0"
+                  }`}
               >
                 <span className="h-6 w-1.5 bg-[var(--accent)] sm:h-8" />
                 {t.fleet.title}
@@ -625,11 +658,10 @@ export default function App() {
                       }
                     }}
                     style={{ transitionDelay: `${i * 120}ms` }}
-                    className={`gradient-border cursor-pointer transition-all duration-700 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/70 ${
-                      fleetVisible
-                        ? "translate-y-0 opacity-100"
-                        : "translate-y-10 opacity-0"
-                    }`}
+                    className={`gradient-border cursor-pointer transition-all duration-700 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/70 ${fleetVisible
+                      ? "translate-y-0 opacity-100"
+                      : "translate-y-10 opacity-0"
+                      }`}
                   >
                     <article className="relative isolate aspect-[4/3] min-w-0 overflow-hidden rounded-3xl bg-[var(--card)] @container sm:aspect-[16/10]">
                       {CARD_PHOTOS[i] ? (
@@ -689,11 +721,10 @@ export default function App() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="rounded-3xl bg-[var(--primary)] p-3 sm:p-6">
               <h2
-                className={`mb-4 flex items-center gap-3 px-1 font-display text-2xl font-bold text-white transition-all duration-700 sm:mb-6 sm:text-3xl ${
-                  pricingVisible
-                    ? "translate-y-0 opacity-100"
-                    : "translate-y-6 opacity-0"
-                }`}
+                className={`mb-4 flex items-center gap-3 px-1 font-display text-2xl font-bold text-white transition-all duration-700 sm:mb-6 sm:text-3xl ${pricingVisible
+                  ? "translate-y-0 opacity-100"
+                  : "translate-y-6 opacity-0"
+                  }`}
               >
                 <span className="h-6 w-1.5 bg-[var(--accent)] sm:h-8" />
                 {t.pricing.title}
@@ -708,11 +739,10 @@ export default function App() {
                   <div
                     key={row.route}
                     style={{ transitionDelay: `${idx * 45}ms` }}
-                    className={`flex items-center justify-between gap-4 rounded-full border-2 border-[var(--accent)] bg-black px-6 py-3 text-white transition-all duration-500 active:scale-[0.98] sm:px-8 sm:py-4 ${
-                      pricingVisible
-                        ? "translate-x-0 opacity-100"
-                        : "-translate-x-8 opacity-0"
-                    }`}
+                    className={`flex items-center justify-between gap-4 rounded-full border-2 border-[var(--accent)] bg-black px-6 py-3 text-white transition-all duration-500 active:scale-[0.98] sm:px-8 sm:py-4 ${pricingVisible
+                      ? "translate-x-0 opacity-100"
+                      : "-translate-x-8 opacity-0"
+                      }`}
                   >
                     <span className="font-display text-base font-semibold sm:text-xl">
                       {row.route}
@@ -737,9 +767,8 @@ export default function App() {
         >
           <div className="pointer-events-none absolute inset-0 z-20 flex items-center">
             <div
-              className={`flex items-center text-[var(--accent)] drop-shadow-[0_0_20px_rgba(249,115,22,0.45)] ${
-                aboutVisible ? "animate-tow-truck" : "opacity-0 -translate-x-full"
-              }`}
+              className={`flex items-center text-[var(--accent)] drop-shadow-[0_0_20px_rgba(249,115,22,0.45)] ${aboutVisible ? "animate-tow-truck" : "opacity-0 -translate-x-full"
+                }`}
             >
               <svg
                 viewBox="0 0 180 80"
@@ -786,13 +815,14 @@ export default function App() {
           </div>
 
           <div className="relative z-10 mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-2 gap-8 divide-x divide-white/10 md:grid-cols-4">
+            <div className="grid grid-cols-2 gap-y-8 md:grid-cols-4 ">
               {t.stats.map((s, index) => (
                 <div
                   key={s.label}
-                  className={`px-4 text-center opacity-0 ${
-                    aboutVisible ? "animate-stat-reveal" : ""
-                  }`}
+                  className={`px-4 text-center opacity-0 border-white/10 ${index % 2 === 0 ? "border-r" : "border-r-0"
+                    } ${index < 3 ? "md:border-r" : "md:border-r-0"
+                    } ${aboutVisible ? "animate-stat-reveal" : ""
+                    }`}
                   style={{
                     animationDelay: `${0.45 + index * 0.45}s`,
                   }}
@@ -847,7 +877,10 @@ export default function App() {
                 <Phone className="h-3.5 w-3.5" />
                 Vv_Evacuator
               </span>
-              <h3 id="modal-title" className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+              <h3
+                id="modal-title"
+                className="font-display text-2xl font-bold tracking-tight sm:text-3xl"
+              >
                 {t.modal.title}
               </h3>
               <p className="mt-2 text-sm text-gray-400">
@@ -856,8 +889,33 @@ export default function App() {
             </div>
 
             <form onSubmit={handlePhoneSubmit} className="space-y-4">
+              {/* Поле имени */}
               <div>
-                <label htmlFor="phone-input" className="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-300">
+                <label
+                  htmlFor="name-input"
+                  className="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-300"
+                >
+                  {lang === "uk" ? "Як вас звати?" : "Your name"}
+                </label>
+                <input
+                  id="name-input"
+                  type="text"
+                  autoFocus
+                  value={clientName}
+                  onChange={(e) => setClientName(e.target.value)}
+                  placeholder={
+                    lang === "uk" ? "Наприклад, Олександр" : "e.g., Alex"
+                  }
+                  className="h-14 w-full rounded-2xl border border-white/20 bg-black/50 px-4 text-lg font-semibold text-white placeholder-gray-500 transition-colors focus:border-[var(--accent)] focus:outline-none"
+                />
+              </div>
+
+              {/* Поле телефона */}
+              <div>
+                <label
+                  htmlFor="phone-input"
+                  className="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-300"
+                >
                   {t.modal.phoneLabel}
                 </label>
                 <div className="relative">
@@ -865,7 +923,6 @@ export default function App() {
                     id="phone-input"
                     type="tel"
                     inputMode="tel"
-                    autoFocus
                     required
                     value={phoneValue}
                     onChange={(e) => {
@@ -885,14 +942,26 @@ export default function App() {
                     {phoneError}
                   </p>
                 )}
+                {submitSuccess && (
+                  <p className="mt-2 text-xs font-semibold text-green-400">
+                    {lang === "uk"
+                      ? "Дякуємо! Заявку відправлено, ми скоро зв'яжемося з вами."
+                      : "Thank you! Request sent, we will contact you soon."}
+                  </p>
+                )}
               </div>
 
               <button
                 type="submit"
-                className="flex h-14 w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-[var(--accent)] text-base font-bold text-black transition-all hover:bg-yellow-400 active:scale-95 active:bg-yellow-400 select-none"
+                disabled={isSending}
+                className="flex h-14 w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-[var(--accent)] text-base font-bold text-black transition-all hover:bg-yellow-400 active:scale-95 active:bg-yellow-400 disabled:opacity-50 select-none"
               >
                 <Send className="h-4 w-4" />
-                {t.modal.submit}
+                {isSending
+                  ? lang === "uk"
+                    ? "Відправляємо..."
+                    : "Sending..."
+                  : t.modal.submit}
               </button>
             </form>
           </div>
@@ -913,7 +982,7 @@ export default function App() {
             </a>
             <a href="#" className="hover:text-black active:text-black">
               {t.footer.privacy}
-            </a>
+          </a>
           </div>
         </div>
       </footer>
