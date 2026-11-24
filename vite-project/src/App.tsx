@@ -181,7 +181,7 @@ const dict = {
       photo: "Фото",
     },
     footer: {
-      rights: "© 2024 Усі права захищено.",
+      rights: "© 2026 Усі права захищено.",
       terms: "Умови використання",
       privacy: "Політика конфіденційності",
     },
@@ -320,7 +320,7 @@ const dict = {
       photo: "Photo",
     },
     footer: {
-      rights: "© 2024 All rights reserved.",
+      rights: "© 2026 All rights reserved.",
       terms: "Terms of use",
       privacy: "Privacy policy",
     },
@@ -347,7 +347,7 @@ function Logo() {
   return (
     <img
       src="/NewVv.png"
-      alt="vv"
+      alt="VV Evacuator — автовози та евакуатор"
       onError={() => setFailed(true)}
       className="max-h-10"
     />
@@ -429,13 +429,18 @@ export default function App() {
   }, [])
 
   const navLinks = [
-    { href: "#fleet", label: t.nav.fleet },
     { href: "#pricing", label: t.nav.pricing },
+    { href: "#fleet", label: t.nav.fleet },
     { href: "#about", label: t.nav.about },
   ]
 
-  const selectCarrier = (c: CarrierType) => {
+  const handleCarrierChange = (c: CarrierType) => {
     setCarrier(c)
+    setCarrierSelected(true)
+  }
+
+  const selectCarrier = (c: CarrierType) => {
+    handleCarrierChange(c)
     document.getElementById("calculator")?.scrollIntoView({ behavior: "smooth" })
   }
 
@@ -444,7 +449,6 @@ export default function App() {
     if (isSending) return
 
     const digitsOnly = phoneValue.replace(/\D/g, "")
-    // Ровно 380 + 9 цифр = 12 цифр. Если нужно 8 цифр после 380, замени {9} на {8}
     const isValidUaPhone = /^380\d{9}$/.test(digitsOnly)
 
     if (!isValidUaPhone) {
@@ -500,10 +504,11 @@ export default function App() {
           type="button"
           onClick={() => setLang(l)}
           aria-pressed={lang === l}
-          className={`h-full px-3 uppercase transition-colors active:scale-95 ${lang === l
-            ? "bg-[var(--primary)] text-[var(--primary-foreground)]"
-            : "hover:bg-gray-50 active:bg-gray-100"
-            }`}
+          className={`h-full px-3 uppercase transition-colors active:scale-95 ${
+            lang === l
+              ? "bg-[var(--primary)] text-[var(--primary-foreground)]"
+              : "hover:bg-gray-50 active:bg-gray-100"
+          }`}
         >
           {l === "uk" ? "UA" : "EN"}
         </button>
@@ -551,16 +556,19 @@ export default function App() {
               onClick={() => setMenuOpen((v) => !v)}
             >
               <span
-                className={`block h-0.75 w-6 bg-black transition-all duration-300 ease-in-out ${menuOpen ? "translate-y-[9px] rotate-45" : ""
-                  }`}
+                className={`block h-0.75 w-6 bg-black transition-all duration-300 ease-in-out ${
+                  menuOpen ? "translate-y-[9px] rotate-45" : ""
+                }`}
               />
               <span
-                className={`block h-0.75 w-6 bg-black transition-all duration-300 ease-in-out ${menuOpen ? "opacity-0" : ""
-                  }`}
+                className={`block h-0.75 w-6 bg-black transition-all duration-300 ease-in-out ${
+                  menuOpen ? "opacity-0" : ""
+                }`}
               />
               <span
-                className={`block h-0.75 w-6 bg-black transition-all duration-300 ease-in-out ${menuOpen ? "-translate-y-[9px] -rotate-45" : ""
-                  }`}
+                className={`block h-0.75 w-6 bg-black transition-all duration-300 ease-in-out ${
+                  menuOpen ? "-translate-y-[9px] -rotate-45" : ""
+                }`}
               />
             </button>
           </div>
@@ -663,21 +671,71 @@ export default function App() {
           </div>
         </section>
 
-        {/* ===== Блок 2: плашка с видами автовозов ===== */}
+        {/* ===== Блок 2: тарифы ===== */}
         <section
-          id="fleet"
+          id="pricing"
           ref={(el) => {
-            if (el) ElementRef.current[0] = el
+            if (el) ElementRef.current[1] = el
           }}
           className="scroll-mt-20 py-16 sm:py-20"
         >
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="rounded-3xl bg-[var(--primary)] p-3 sm:p-6">
               <h2
-                className={`mb-4 flex items-center gap-3 px-1 font-display text-2xl font-bold text-white transition-all duration-700 sm:mb-6 sm:text-3xl ${fleetVisible
-                  ? "translate-y-0 opacity-100"
-                  : "translate-y-6 opacity-0"
-                  }`}
+                className={`mb-4 flex items-center gap-3 px-1 font-display text-2xl font-bold text-white transition-all duration-700 sm:mb-6 sm:text-3xl ${
+                  pricingVisible
+                    ? "translate-y-0 opacity-100"
+                    : "translate-y-6 opacity-0"
+                }`}
+              >
+                <span className="h-6 w-1.5 bg-[var(--accent)] sm:h-8" />
+                {t.pricing.title}
+              </h2>
+
+              <div className="mx-auto flex max-w-3xl flex-col gap-3">
+                <div className="flex justify-between px-6 text-xs font-bold uppercase tracking-widest text-gray-400 sm:px-8 sm:text-sm">
+                  <span>{t.pricing.routeHead}</span>
+                  <span>{t.pricing.priceHead}</span>
+                </div>
+                {t.pricing.rows.map((row, idx) => (
+                  <div
+                    key={row.route}
+                    style={{ transitionDelay: `${idx * 45}ms` }}
+                    className={`flex items-center justify-between gap-4 rounded-full border-2 border-[var(--accent)] bg-black px-6 py-3 text-white transition-all duration-500 active:scale-[0.98] sm:px-8 sm:py-4 ${
+                      pricingVisible
+                        ? "translate-x-0 opacity-100"
+                        : "-translate-x-8 opacity-0"
+                    }`}
+                  >
+                    <span className="font-display text-base font-semibold sm:text-xl">
+                      {row.route}
+                    </span>
+                    <span className="whitespace-nowrap text-right text-sm font-bold text-[var(--accent)] sm:text-lg">
+                      {row.price}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ===== Блок 3: плашка с видами автовозов ===== */}
+        <section
+          id="fleet"
+          ref={(el) => {
+            if (el) ElementRef.current[0] = el
+          }}
+          className="scroll-mt-20 pb-16 sm:pb-20"
+        >
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="rounded-3xl bg-[var(--primary)] p-3 sm:p-6">
+              <h2
+                className={`mb-4 flex items-center gap-3 px-1 font-display text-2xl font-bold text-white transition-all duration-700 sm:mb-6 sm:text-3xl ${
+                  fleetVisible
+                    ? "translate-y-0 opacity-100"
+                    : "translate-y-6 opacity-0"
+                }`}
               >
                 <span className="h-6 w-1.5 bg-[var(--accent)] sm:h-8" />
                 {t.fleet.title}
@@ -698,10 +756,11 @@ export default function App() {
                       }
                     }}
                     style={{ transitionDelay: `${i * 120}ms` }}
-                    className={`gradient-border cursor-pointer transition-all duration-700 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/70 ${fleetVisible
-                      ? "translate-y-0 opacity-100"
-                      : "translate-y-10 opacity-0"
-                      }`}
+                    className={`gradient-border cursor-pointer transition-all duration-700 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/70 ${
+                      fleetVisible
+                        ? "translate-y-0 opacity-100"
+                        : "translate-y-10 opacity-0"
+                    }`}
                   >
                     <article className="relative isolate aspect-[4/3] min-w-0 overflow-hidden rounded-3xl bg-[var(--card)] @container sm:aspect-[16/10]">
                       {CARD_PHOTOS[i] ? (
@@ -750,54 +809,7 @@ export default function App() {
           </div>
         </section>
 
-        {/* ===== Блок: тарифы ===== */}
-        <section
-          id="pricing"
-          ref={(el) => {
-            if (el) ElementRef.current[1] = el
-          }}
-          className="scroll-mt-20 pb-16 sm:pb-20"
-        >
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="rounded-3xl bg-[var(--primary)] p-3 sm:p-6">
-              <h2
-                className={`mb-4 flex items-center gap-3 px-1 font-display text-2xl font-bold text-white transition-all duration-700 sm:mb-6 sm:text-3xl ${pricingVisible
-                  ? "translate-y-0 opacity-100"
-                  : "translate-y-6 opacity-0"
-                  }`}
-              >
-                <span className="h-6 w-1.5 bg-[var(--accent)] sm:h-8" />
-                {t.pricing.title}
-              </h2>
-
-              <div className="mx-auto flex max-w-3xl flex-col gap-3">
-                <div className="flex justify-between px-6 text-xs font-bold uppercase tracking-widest text-gray-400 sm:px-8 sm:text-sm">
-                  <span>{t.pricing.routeHead}</span>
-                  <span>{t.pricing.priceHead}</span>
-                </div>
-                {t.pricing.rows.map((row, idx) => (
-                  <div
-                    key={row.route}
-                    style={{ transitionDelay: `${idx * 45}ms` }}
-                    className={`flex items-center justify-between gap-4 rounded-full border-2 border-[var(--accent)] bg-black px-6 py-3 text-white transition-all duration-500 active:scale-[0.98] sm:px-8 sm:py-4 ${pricingVisible
-                      ? "translate-x-0 opacity-100"
-                      : "-translate-x-8 opacity-0"
-                      }`}
-                  >
-                    <span className="font-display text-base font-semibold sm:text-xl">
-                      {row.route}
-                    </span>
-                    <span className="whitespace-nowrap text-right text-sm font-bold text-[var(--accent)] sm:text-lg">
-                      {row.price}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ===== Блок 3: цифры «Про нас» ===== */}
+        {/* ===== Блок 4: цифры «Про нас» ===== */}
         <section
           id="about"
           ref={(el) => {
@@ -807,10 +819,12 @@ export default function App() {
         >
           <div className="pointer-events-none absolute inset-0 z-20 flex items-center">
             <div
-              className={`flex items-center text-[var(--accent)] drop-shadow-[0_0_20px_rgba(249,115,22,0.45)] ${aboutVisible ? "animate-tow-truck" : "opacity-0 -translate-x-full"
-                }`}
+              className={`flex items-center text-[var(--accent)] drop-shadow-[0_0_20px_rgba(249,115,22,0.45)] ${
+                aboutVisible ? "animate-tow-truck" : "opacity-0 -translate-x-full"
+              }`}
             >
               <svg
+                aria-hidden="true"
                 viewBox="0 0 180 80"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -859,10 +873,11 @@ export default function App() {
               {t.stats.map((s, index) => (
                 <div
                   key={s.label}
-                  className={`px-4 text-center opacity-0 border-white/10 ${index % 2 === 0 ? "border-r" : "border-r-0"
-                    } ${index < 3 ? "md:border-r" : "md:border-r-0"
-                    } ${aboutVisible ? "animate-stat-reveal" : ""
-                    }`}
+                  className={`px-4 text-center opacity-0 border-white/10 ${
+                    index % 2 === 0 ? "border-r" : "border-r-0"
+                  } ${index < 3 ? "md:border-r" : "md:border-r-0"} ${
+                    aboutVisible ? "animate-stat-reveal" : ""
+                  }`}
                   style={{
                     animationDelay: `${0.45 + index * 0.45}s`,
                   }}
@@ -876,18 +891,19 @@ export default function App() {
             </div>
           </div>
         </section>
-      </main>
 
-      <section id="calculator" className="scroll-mt-20 py-16 sm:py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <DeliveryCalculator
-            t={t.calc}
-            lang={lang}
-            carrier={carrier}
-            onCarrierChange={setCarrier}
-          />
-        </div>
-      </section>
+        {/* ===== Блок 5: калькулятор ===== */}
+        <section id="calculator" className="scroll-mt-20 py-16 sm:py-20">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <DeliveryCalculator
+              t={t.calc}
+              lang={lang}
+              carrier={carrier}
+              onCarrierChange={handleCarrierChange}
+            />
+          </div>
+        </section>
+      </main>
 
       {/* ===== МОДАЛКА: Оформити заявку ===== */}
       {orderModalOpen && (
@@ -970,10 +986,11 @@ export default function App() {
                       if (phoneError) setPhoneError("")
                     }}
                     placeholder={t.modal.phonePlaceholder}
-                    className={`h-14 w-full rounded-2xl border bg-black/50 px-4 text-lg font-semibold text-white placeholder-gray-500 transition-colors focus:outline-none ${phoneError
-                      ? "border-red-500 focus:border-red-500"
-                      : "border-white/20 focus:border-[var(--accent)]"
-                      }`}
+                    className={`h-14 w-full rounded-2xl border bg-black/50 px-4 text-lg font-semibold text-white placeholder-gray-500 transition-colors focus:outline-none ${
+                      phoneError
+                        ? "border-red-500 focus:border-red-500"
+                        : "border-white/20 focus:border-[var(--accent)]"
+                    }`}
                   />
                 </div>
                 {phoneError && (
