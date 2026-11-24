@@ -6,12 +6,12 @@ import {
   ArrowRight,
   Film,
   Image as ImageIcon,
-  Menu,
   Phone,
   Send,
   Star,
   X,
 } from "lucide-react"
+import { FaInstagram, FaTelegramPlane, FaTiktok } from "react-icons/fa"
 
 type Lang = "uk" | "en"
 
@@ -23,6 +23,27 @@ const CARD_PHOTOS = [
   "/avtovoz-3.jpg",
   "/avtovoz-8.jpg",
 ]
+
+const SOCIAL_LINKS = [
+  {
+    name: "Instagram",
+    href: "https://www.instagram.com/vv_evakuator/",
+    icon: FaInstagram,
+    hoverClass: "hover:border-white hover:text-pink-400",
+  },
+  {
+    name: "TikTok",
+    href: "https://www.tiktok.com/@vv_evakuator",
+    icon: FaTiktok,
+    hoverClass: "hover:border-white hover:text-black",
+  },
+  {
+    name: "Telegram",
+    href: "https://t.me/VV_EVAKUATOR",
+    icon: FaTelegramPlane,
+    hoverClass: "hover:border-white hover:text-sky-400",
+  },
+] as const
 
 const OUTLINE = "text-white"
 
@@ -42,7 +63,7 @@ const dict = {
       rating: "Рейтинг довіри",
     },
     modal: {
-    title: "Швидка заявка на перевезення",
+      title: "Швидка заявка на перевезення",
       subtitle: "Залиште свої контакти, і наш логіст зв'яжеться з вами протягом 10 хвилин.",
       nameLabel: "Як вас звати?",
       namePlaceholder: "Наприклад, Олександр",
@@ -342,6 +363,7 @@ export default function App() {
   const [clientName, setClientName] = useState("")
   const [submitSuccess, setSubmitSuccess] = useState(false)
   const [carrier, setCarrier] = useState<CarrierType>("economy")
+  const [carrierSelected, setCarrierSelected] = useState(false)
   const [videoFailed, setVideoFailed] = useState(!HERO_VIDEO)
   const [isSending, setIsSending] = useState(false)
   const [fleetVisible, setFleetVisible] = useState(false)
@@ -417,13 +439,20 @@ export default function App() {
     document.getElementById("calculator")?.scrollIntoView({ behavior: "smooth" })
   }
 
- const handlePhoneSubmit = async (e: React.FormEvent) => {
+  const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (isSending) return
 
     const digitsOnly = phoneValue.replace(/\D/g, "")
-    if (digitsOnly.length < 10) {
-      setPhoneError(t.modal.invalidPhone)
+    // Ровно 380 + 9 цифр = 12 цифр. Если нужно 8 цифр после 380, замени {9} на {8}
+    const isValidUaPhone = /^380\d{9}$/.test(digitsOnly)
+
+    if (!isValidUaPhone) {
+      setPhoneError(
+        lang === "uk"
+          ? "Введіть коректний номер: +380 та ще 9 цифр"
+          : "Enter a valid number: +380 followed by 9 digits"
+      )
       return
     }
 
@@ -431,11 +460,15 @@ export default function App() {
     setIsSending(true)
 
     const cleanName = clientName.trim() || "Не вказано"
+    const carrierText = carrierSelected
+      ? t.calc.carrierOptions[carrier].name
+      : "Тип автовоза не обрано"
+
     const message = [
       `<b>🚨 Нова заявка з сайту!</b>`,
       `<b>👤 Ім'я:</b> ${cleanName}`,
       `<b>📞 Телефон:</b> +${digitsOnly}`,
-      `<b>🚛 Обраний тип:</b> ${t.calc.carrierOptions[carrier].name}`,
+      `<b>🚛 Автовоз:</b> ${carrierText}`,
       `<b>🕒 Час:</b> ${new Date().toLocaleString("uk-UA")}`,
     ].join("\n")
 
@@ -489,7 +522,7 @@ export default function App() {
             </span>
           </div>
           <nav
-            className="hidden items-center gap-8 text-sm font-medium md:flex"
+            className="hidden items-center gap-8 text-sm font-medium min-[855px]:flex"
             aria-label="Main"
           >
             {navLinks.map((l) => (
@@ -506,27 +539,34 @@ export default function App() {
             {langSwitch}
             <a
               href="#calculator"
-              className="hidden h-10 items-center justify-center bg-[var(--primary)] px-6 text-sm font-medium text-[var(--primary-foreground)] transition-colors hover:bg-gray-900 active:scale-95 active:bg-black md:inline-flex"
+              className="hidden h-10 items-center justify-center bg-[var(--primary)] px-6 text-sm font-medium text-[var(--primary-foreground)] transition-colors hover:bg-gray-900 active:scale-95 active:bg-black min-[855px]:inline-flex"
             >
               {t.cta}
             </a>
             <button
               type="button"
-              className="p-2 transition-transform active:scale-90 md:hidden"
+              className="flex h-10 w-10 flex-col items-center justify-center gap-1.5 transition-transform duration-300 ease-in-out active:scale-90 min-[855px]:hidden"
               aria-label={menuOpen ? t.close : t.menu}
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen((v) => !v)}
             >
-              {menuOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
+              <span
+                className={`block h-0.75 w-6 bg-black transition-all duration-300 ease-in-out ${menuOpen ? "translate-y-[9px] rotate-45" : ""
+                  }`}
+              />
+              <span
+                className={`block h-0.75 w-6 bg-black transition-all duration-300 ease-in-out ${menuOpen ? "opacity-0" : ""
+                  }`}
+              />
+              <span
+                className={`block h-0.75 w-6 bg-black transition-all duration-300 ease-in-out ${menuOpen ? "-translate-y-[9px] -rotate-45" : ""
+                  }`}
+              />
             </button>
           </div>
         </div>
         {menuOpen && (
-          <div className="border-t border-[var(--border)] bg-[var(--background)] md:hidden">
+          <div className="border-t border-[var(--border)] bg-[var(--background)] min-[855px]:hidden">
             <nav
               className="mx-auto flex max-w-7xl flex-col px-4 py-2 sm:px-6"
               aria-label="Mobile"
@@ -930,11 +970,10 @@ export default function App() {
                       if (phoneError) setPhoneError("")
                     }}
                     placeholder={t.modal.phonePlaceholder}
-                    className={`h-14 w-full rounded-2xl border bg-black/50 px-4 text-lg font-semibold text-white placeholder-gray-500 transition-colors focus:outline-none ${
-                      phoneError
-                        ? "border-red-500 focus:border-red-500"
-                        : "border-white/20 focus:border-[var(--accent)]"
-                    }`}
+                    className={`h-14 w-full rounded-2xl border bg-black/50 px-4 text-lg font-semibold text-white placeholder-gray-500 transition-colors focus:outline-none ${phoneError
+                      ? "border-red-500 focus:border-red-500"
+                      : "border-white/20 focus:border-[var(--accent)]"
+                      }`}
                   />
                 </div>
                 {phoneError && (
@@ -968,7 +1007,7 @@ export default function App() {
         </div>
       )}
 
-      <footer className="bg-[var(--background)] py-12">
+      <footer className="border-t border-[var(--border)] bg-[var(--background)] py-12">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 sm:px-6 md:flex-row lg:px-8">
           <div className="flex items-center gap-3">
             <Logo />
@@ -976,13 +1015,29 @@ export default function App() {
               {t.footer.rights}
             </span>
           </div>
+
+          <nav aria-label="Social media" className="flex items-center gap-3">
+            {SOCIAL_LINKS.map(({ name, href, icon: Icon, hoverClass }) => (
+              <a
+                key={name}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={name}
+                className={`flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] text-gray-700 transition-all hover:scale-110 active:scale-95 ${hoverClass}`}
+              >
+                <Icon className="h-4 w-4" aria-hidden="true" />
+              </a>
+            ))}
+          </nav>
+
           <div className="flex gap-6 text-sm text-gray-600">
             <a href="#" className="hover:text-black active:text-black">
               {t.footer.terms}
             </a>
             <a href="#" className="hover:text-black active:text-black">
               {t.footer.privacy}
-          </a>
+            </a>
           </div>
         </div>
       </footer>

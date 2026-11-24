@@ -25,6 +25,11 @@ export default async function handler(req: any, res: any) {
         chat_id: CHAT_ID,
         text: req.body.text,
         parse_mode: "HTML",
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: "✅ Відмітити обробленим", callback_data: "mark_done" }],
+          ],
+        },
       }),
     })
 
