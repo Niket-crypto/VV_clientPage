@@ -7,6 +7,7 @@ import {
   Film,
   Image as ImageIcon,
   Phone,
+  Plus,
   Send,
   Star,
   X,
@@ -14,6 +15,13 @@ import {
 import { FaInstagram, FaTelegramPlane, FaTiktok } from "react-icons/fa"
 
 type Lang = "uk" | "en"
+
+type FaqItem = {
+  q: string
+  a: string
+  points?: readonly string[]
+  note?: string
+}
 
 const HERO_VIDEO = "/АвтовозКайф.mp4"
 
@@ -30,18 +38,21 @@ const SOCIAL_LINKS = [
     href: "https://www.instagram.com/vv_evakuator/",
     icon: FaInstagram,
     hoverClass: "hover:border-white hover:text-pink-400",
+    activeClass: "active:border-white active:text-pink-400"
   },
   {
     name: "TikTok",
     href: "https://www.tiktok.com/@vv_evakuator",
     icon: FaTiktok,
     hoverClass: "hover:border-white hover:text-black",
+    activeClass: "active:border-white active:text-black"
   },
   {
     name: "Telegram",
     href: "https://t.me/VV_EVAKUATOR",
     icon: FaTelegramPlane,
     hoverClass: "hover:border-white hover:text-sky-400",
+    activeClass: "active:border-white active:text-sky-400",
   },
 ] as const
 
@@ -53,7 +64,12 @@ const dict = {
   uk: {
     title: "vv — Автовози та логістика",
     tagline: "Vv_Evacuator",
-    nav: { fleet: "Автовози", pricing: "Дізнатися тарифи", about: "Про нас" },
+    nav: {
+      fleet: "Автовози",
+      pricing: "Дізнатися тарифи",
+      about: "Про нас",
+      faq: "Питання",
+    },
     cta: "Отримати розрахунок",
     hero: {
       title: "Дбайлива доставка вашого авто в будь-яку точку.",
@@ -64,7 +80,8 @@ const dict = {
     },
     modal: {
       title: "Швидка заявка на перевезення",
-      subtitle: "Залиште свої контакти, і наш логіст зв'яжеться з вами протягом 10 хвилин.",
+      subtitle:
+        "Залиште свої контакти, і наш логіст зв'яжеться з вами протягом 10 хвилин.",
       nameLabel: "Як вас звати?",
       namePlaceholder: "Наприклад, Олександр",
       phoneLabel: "Номер телефону",
@@ -72,8 +89,10 @@ const dict = {
       submit: "Надіслати заявку",
       sending: "Відправляємо...",
       invalidPhone: "Будь ласка, введіть коректний номер телефону",
-      successMsg: "Дякуємо! Заявку прийнято, ми зв'яжемося з вами найближчим часом.",
-      errorMsg: "Помилка відправки. Спробуйте ще раз або зателефонуйте нам.",
+      successMsg:
+        "Дякуємо! Заявку прийнято, ми зв'яжемося з вами найближчим часом.",
+      errorMsg:
+        "Помилка відправки. Спробуйте ще раз або зателефонуйте нам.",
     },
     pricing: {
       title: "Тарифи на доставку авто",
@@ -150,14 +169,18 @@ const dict = {
       carrierOptions: {
         economy: { name: "Збірний автовоз", desc: "Економ, множник 1.0" },
         evacuator: { name: "Евакуатор", desc: "Окреме авто, множник 1.1" },
-        vip: { name: "Закритий VIP Brian James", desc: "Повний захист, множник 1.6" },
+        vip: {
+          name: "Закритий VIP Brian James",
+          desc: "Повний захист, множник 1.6",
+        },
       },
       winch: "Авто не на ходу (потрібна лебідка)",
       submit: "Розрахувати вартість",
       resultTitle: "Орієнтовна вартість",
       rangeFrom: "від",
       rangeTo: "до",
-      approx: "Розрахунок орієнтовний. Точну ціну підтвердить менеджер після уточнення деталей.",
+      approx:
+        "Розрахунок орієнтовний. Точну ціну підтвердить менеджер після уточнення деталей.",
       details: "Деталізація",
       detailRoute: "Базовий маршрут",
       detailCarrier: "Доплата за тип автовоза",
@@ -166,8 +189,110 @@ const dict = {
       order: "Оформити заявку в Telegram",
       msg: "Доброго дня! Хочу замовити доставку авто.",
     },
+    faq: {
+      title: "Запитання та відповіді",
+      items: [
+        {
+          q: "Які послуги ми надаємо?",
+          a: "Ми організовуємо перевезення авто та мототехніки по Україні й Європі та закриваємо супутні логістичні задачі:",
+          points: [
+            "Перевезення автомобілів і мотоциклів по Україні та країнах ЄС",
+            "Доставка відкритими й закритими автовозами та евакуаторами",
+            "Перегін авто своїм ходом із нашим професійним водієм",
+            "Доставка транспорту до морських портів",
+            "Супровід і вирішення питань під час перетину кордону",
+            "Перевезення вашим авто пасажирів або домашніх тварин за домовленістю",
+            "Допомога з продажем автомобіля в Україні",
+          ],
+        },
+        {
+          q: "Які гарантії безпеки ми надаємо?",
+          a: "Працюємо офіційно за ліцензією та забезпечуємо повну прозорість на кожному етапі:",
+          points: [
+            "Підписання офіційного договору перед початком перевезення",
+            "Надання документів водія та техніки перед відправленням",
+            "Розрахунок після фактичної доставки автомобіля",
+            "Доступ до геолокації автовоза або водія в дорозі",
+          ],
+          note: "Такий підхід захищає ваш транспорт юридично і фінансово протягом усього маршруту.",
+        },
+        {
+          q: "Як замовити перевезення авто?",
+          a: "Оформлення займає кілька простих кроків:",
+          points: [
+            "Ви залишаєте заявку з маршрутом і даними про авто",
+            "Отримуєте точний розрахунок вартості від логіста",
+            "Обираєте оптимальний формат доставки (автовоз, евакуатор або перегін)",
+            "Узгоджуємо дати, деталі та підписуємо договір",
+            "Забираємо авто у зручній для вас точці",
+            "Доставляємо автомобіль і проводимо фінальний розрахунок",
+          ],
+        },
+        {
+          q: "Чи можна перевезти разом з авто речі або пасажирів?",
+          a: "Так, за попередньою домовленістю ми можемо поєднати доставку автомобіля з перевезенням особистих речей, товарів, а також ваших близьких чи домашніх улюбленців.",
+        },
+        {
+          q: "Чи потрібна передоплата?",
+          a: "Ні, ми працюємо без передоплати. Ви оплачуєте послугу вже після фактичного отримання авто в точці призначення.",
+        },
+        {
+          q: "Який досвід у нашої компанії?",
+          a: "Ми працюємо у сфері автоперевезень понад 5 років. За цей час доставили більше 10 000 автомобілів по Україні та Європі.",
+        },
+        {
+          q: "Чи можна замовити доставку, якщо я зараз за кордоном?",
+          a: "Так, більшість міжнародних замовлень ми оформлюємо дистанційно через месенджери або телефоном. Ми самостійно заберемо авто, організуємо логістику та передамо машину вам або вашій довіреній особі в Україні чи ЄС.",
+        },
+        {
+          q: "Які документи потрібні для перевезення?",
+          a: "Базовий пакет документів для оформлення рейсу:",
+          points: [
+            "Свідоцтво про реєстрацію авто (техпаспорт)",
+            "Довіреність або шеринг техпаспорта в застосунку Дія",
+            "Зелена карта (для міжнародних маршрутів)",
+            "Чинний техогляд (при перетині кордону з Румунією, Болгарією або Молдовою)",
+            "Паспортні дані власника або замовника",
+            "Контакти осіб, які передають та приймають авто",
+          ],
+          note: "Точний перелік уточнюємо індивідуально під ваш маршрут і тип перевезення.",
+        },
+        {
+          q: "Чи перевозите ви нові авто з автосалонів?",
+          a: "Так, регулярно доставляємо нові автомобілі з дилерських центрів в Україні та Європі. Беремо на себе комунікацію з салоном, перевірку документів і дбайливу доставку, зокрема на закритому VIP-автовозі. Маємо досвід роботи з офіційними дилерами BMW, Mercedes та Porsche.",
+        },
+        {
+          q: "Чи застраховане авто під час транспортування?",
+          a: "Так, автомобіль захищений умовами договору на весь час поїздки. Під час доставки автовозом або евакуатором діє страхування вантажу, а при перегоні своїм ходом відповідальність закріплюється за водієм у відповідних документах.",
+        },
+        {
+          q: "Чи застрахована відповідальність перевізника?",
+          a: "Так, відповідальність перевізника застрахована. Якщо під час перевезення авто отримає пошкодження з вини водія або компанії, збитки покриває страхова компанія. Ліцензія, офіційний договір і поліс гарантують ваш фінансовий захист.",
+        },
+        {
+          q: "Чи можна відстежувати авто в дорозі?",
+          a: "Так, за вашим запитом ми надаємо доступ до GPS-трекера автовоза або водія, щоб ви в будь-який момент бачили актуальне розташування машини на маршруті.",
+        },
+        {
+          q: "Хто відповідає за авто, якщо щось трапиться в дорозі?",
+          a: "Повну відповідальність за збереження автомобіля несе компанія. Умови та гарантії фіксуються у договорі перед виїздом, а до рейсів допускаються лише перевірені водії з досвідом.",
+        },
+        {
+          q: "Чи можу я супроводжувати авто під час поїздки?",
+          a: "Так, супровід можливий при перегоні авто своїм ходом, а також в окремих випадках на евакуаторі, якщо в кабіні є вільне місце.",
+        },
+        {
+          q: "Хто оплачує пальне при доставці своїм ходом?",
+          a: "Водій заправляє авто в дорозі та зберігає всі чеки з АЗС, які ви компенсуєте за фактом доставки. Якщо разом з авто їде власник або довірена особа, заправку можна оплачувати безпосередньо в дорозі.",
+        },
+        {
+          q: "Чи можна передати особисті речі в багажнику?",
+          a: "Так, ви можете покласти особисті речі в авто, але їх обсяг і вміст потрібно узгодити заздалегідь. Ми не приймаємо заборонені предмети, небезпечні вантажі та цінності, а весь багаж має бути надійно зафіксований.",
+        },
+      ] as readonly FaqItem[],
+    },
     stats: [
-      { value: "15+", label: "Років на ринку" },
+      { value: "5+", label: "Років на ринку" },
       { value: "10к+", label: "Доставлених авто" },
       { value: "100%", label: "Страхування вантажу" },
       { value: "24/7", label: "Підтримка в дорозі" },
@@ -191,7 +316,12 @@ const dict = {
   en: {
     title: "vv — Car Transport & Logistics",
     tagline: "Vv_Evacuator",
-    nav: { fleet: "Car carriers", pricing: "See pricing", about: "About us" },
+    nav: {
+      fleet: "Car carriers",
+      pricing: "See pricing",
+      about: "About us",
+      faq: "FAQ",
+    },
     cta: "Get a quote",
     hero: {
       title: "Careful delivery of your car to any destination.",
@@ -202,7 +332,8 @@ const dict = {
     },
     modal: {
       title: "Quick transport request",
-      subtitle: "Leave your details and our logistics specialist will contact you within 10 minutes.",
+      subtitle:
+        "Leave your details and our logistics specialist will contact you within 10 minutes.",
       nameLabel: "Your name",
       namePlaceholder: "e.g., Alex",
       phoneLabel: "Phone number",
@@ -210,7 +341,8 @@ const dict = {
       submit: "Send request",
       sending: "Sending...",
       invalidPhone: "Please enter a valid phone number",
-      successMsg: "Thank you! Request received, we will contact you shortly.",
+      successMsg:
+        "Thank you! Request received, we will contact you shortly.",
       errorMsg: "Failed to send. Please try again.",
     },
     pricing: {
@@ -288,14 +420,18 @@ const dict = {
       carrierOptions: {
         economy: { name: "Shared carrier", desc: "Economy, multiplier 1.0" },
         evacuator: { name: "Tow truck", desc: "Single car, multiplier 1.1" },
-        vip: { name: "Enclosed VIP Brian James", desc: "Full protection, multiplier 1.6" },
+        vip: {
+          name: "Enclosed VIP Brian James",
+          desc: "Full protection, multiplier 1.6",
+        },
       },
       winch: "Car does not run (winch required)",
       submit: "Calculate cost",
       resultTitle: "Estimated cost",
       rangeFrom: "from",
       rangeTo: "to",
-      approx: "This is an estimate. A manager will confirm the exact price after clarifying the details.",
+      approx:
+        "This is an estimate. A manager will confirm the exact price after clarifying the details.",
       details: "Breakdown",
       detailRoute: "Base route",
       detailCarrier: "Carrier type surcharge",
@@ -304,8 +440,110 @@ const dict = {
       order: "Submit request via Telegram",
       msg: "Hello! I would like to order a car delivery.",
     },
+    faq: {
+      title: "Frequently asked questions",
+      items: [
+        {
+          q: "What services do we provide?",
+          a: "We handle car and motorcycle transport across Ukraine and Europe along with related logistics:",
+          points: [
+            "Car and motorcycle transport across Ukraine and the EU",
+            "Open, enclosed VIP car carriers and tow trucks",
+            "Drive-away delivery with our professional driver",
+            "Delivery to and from sea ports",
+            "Border-crossing assistance and coordination",
+            "Transport of passengers or pets in your vehicle by prior agreement",
+            "Assistance with selling your car in Ukraine",
+          ],
+        },
+        {
+          q: "What safety guarantees do we offer?",
+          a: "We operate officially under a transport license and keep every stage transparent:",
+          points: [
+            "Official contract signed before every trip",
+            "Driver and carrier documents provided prior to departure",
+            "Payment after actual vehicle delivery",
+            "Live GPS location sharing during transit",
+          ],
+          note: "This keeps your vehicle legally and financially protected along the entire route.",
+        },
+        {
+          q: "How do I book a car transport?",
+          a: "Booking takes just a few straightforward steps:",
+          points: [
+            "Submit a request with your route and vehicle details",
+            "Receive an accurate quote from our logistics manager",
+            "Choose the best transport method (carrier, tow truck, or driver)",
+            "Confirm dates, details, and sign the contract",
+            "We pick up your vehicle at the agreed location",
+            "Receive your car and complete payment on delivery",
+          ],
+        },
+        {
+          q: "Can I transport personal items or passengers along with the car?",
+          a: "Yes, by prior agreement we can combine vehicle delivery with transporting personal belongings, cargo, or accompanying family members and pets.",
+        },
+        {
+          q: "Is a prepayment required?",
+          a: "No, we work without prepayment. You pay only after your vehicle is delivered to the destination.",
+        },
+        {
+          q: "How much experience does the company have?",
+          a: "We have over 5 years of experience in vehicle transport and have safely delivered more than 10,000 cars across Ukraine and Europe.",
+        },
+        {
+          q: "Can I order transport if I am currently abroad?",
+          a: "Yes, most international orders are arranged remotely via messengers or phone. We handle pickup, logistics, and handover to you or your representative in Ukraine or Europe.",
+        },
+        {
+          q: "What documents are required to book transport?",
+          a: "Standard documents needed for the trip:",
+          points: [
+            "Vehicle registration certificate",
+            "Power of attorney or digital sharing via Diia",
+            "Green Card insurance (for international routes)",
+            "Valid technical inspection (for Romania, Bulgaria, or Moldova)",
+            "Owner or customer passport details",
+            "Contact details for pickup and drop-off persons",
+          ],
+          note: "Exact requirements are confirmed individually based on your route and transport method.",
+        },
+        {
+          q: "Can you deliver a brand-new car from a dealership?",
+          a: "Yes, we regularly transport new vehicles from dealerships in Ukraine and Europe, including enclosed VIP carriers. We coordinate directly with dealers and have experience with official BMW, Mercedes, and Porsche showrooms.",
+        },
+        {
+          q: "Is my car insured during transport?",
+          a: "Yes, your vehicle is covered under our contract throughout the journey. Carrier and tow truck deliveries include mandatory cargo insurance, while drive-away deliveries are backed by signed driver liability documents.",
+        },
+        {
+          q: "Is carrier liability insured?",
+          a: "Yes, our carrier liability is fully insured. In the unlikely event of damage caused by our driver or company during transit, the insurance company compensates the loss.",
+        },
+        {
+          q: "Can I track my vehicle during delivery?",
+          a: "Yes, upon request we provide a live GPS tracker link for the carrier or driver so you always know where your vehicle is.",
+        },
+        {
+          q: "Who is responsible if something happens on the road?",
+          a: "Our company bears full responsibility for your vehicle along the entire route. All terms and guarantees are fixed in the contract, and every driver is thoroughly vetted.",
+        },
+        {
+          q: "Can I accompany my car during the trip?",
+          a: "Yes, this is possible for drive-away deliveries and in some cases on a tow truck if cabin seating is available.",
+        },
+        {
+          q: "Who pays for fuel during drive-away delivery?",
+          a: "Our driver refuels the car and keeps all receipts, which are reimbursed upon delivery. If the owner or a representative travels in the car, they can pay for fuel directly.",
+        },
+        {
+          q: "Can I send items inside the trunk?",
+          a: "Yes, personal items can be placed in the trunk after agreeing on the quantity and contents in advance. Prohibited, hazardous, or valuable items are not accepted, and all luggage must be securely fastened.",
+        },
+      ] as readonly FaqItem[],
+    },
     stats: [
-      { value: "15+", label: "Years on the market" },
+      { value: "5+", label: "Years on the market" },
       { value: "10k+", label: "Cars delivered" },
       { value: "100%", label: "Cargo insurance" },
       { value: "24/7", label: "Support on the road" },
@@ -364,6 +602,7 @@ export default function App() {
   const [submitSuccess, setSubmitSuccess] = useState(false)
   const [carrier, setCarrier] = useState<CarrierType>("economy")
   const [carrierSelected, setCarrierSelected] = useState(false)
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null)
   const [videoFailed, setVideoFailed] = useState(!HERO_VIDEO)
   const [isSending, setIsSending] = useState(false)
   const [fleetVisible, setFleetVisible] = useState(false)
@@ -432,6 +671,7 @@ export default function App() {
     { href: "#pricing", label: t.nav.pricing },
     { href: "#fleet", label: t.nav.fleet },
     { href: "#about", label: t.nav.about },
+    { href: "#faq", label: t.nav.faq },
   ]
 
   const handleCarrierChange = (c: CarrierType) => {
@@ -504,11 +744,10 @@ export default function App() {
           type="button"
           onClick={() => setLang(l)}
           aria-pressed={lang === l}
-          className={`h-full px-3 uppercase transition-colors active:scale-95 ${
-            lang === l
+          className={`h-full px-3 uppercase transition-colors active:scale-95 ${lang === l
               ? "bg-[var(--primary)] text-[var(--primary-foreground)]"
               : "hover:bg-gray-50 active:bg-gray-100"
-          }`}
+            }`}
         >
           {l === "uk" ? "UA" : "EN"}
         </button>
@@ -556,19 +795,16 @@ export default function App() {
               onClick={() => setMenuOpen((v) => !v)}
             >
               <span
-                className={`block h-0.75 w-6 bg-black transition-all duration-300 ease-in-out ${
-                  menuOpen ? "translate-y-[9px] rotate-45" : ""
-                }`}
+                className={`block h-0.75 w-6 bg-black transition-all duration-300 ease-in-out ${menuOpen ? "translate-y-[9px] rotate-45" : ""
+                  }`}
               />
               <span
-                className={`block h-0.75 w-6 bg-black transition-all duration-300 ease-in-out ${
-                  menuOpen ? "opacity-0" : ""
-                }`}
+                className={`block h-0.75 w-6 bg-black transition-all duration-300 ease-in-out ${menuOpen ? "opacity-0" : ""
+                  }`}
               />
               <span
-                className={`block h-0.75 w-6 bg-black transition-all duration-300 ease-in-out ${
-                  menuOpen ? "-translate-y-[9px] -rotate-45" : ""
-                }`}
+                className={`block h-0.75 w-6 bg-black transition-all duration-300 ease-in-out ${menuOpen ? "-translate-y-[9px] -rotate-45" : ""
+                  }`}
               />
             </button>
           </div>
@@ -682,11 +918,10 @@ export default function App() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="rounded-3xl bg-[var(--primary)] p-3 sm:p-6">
               <h2
-                className={`mb-4 flex items-center gap-3 px-1 font-display text-2xl font-bold text-white transition-all duration-700 sm:mb-6 sm:text-3xl ${
-                  pricingVisible
+                className={`mb-4 flex items-center gap-3 px-1 font-display text-2xl font-bold text-white transition-all duration-700 sm:mb-6 sm:text-3xl ${pricingVisible
                     ? "translate-y-0 opacity-100"
                     : "translate-y-6 opacity-0"
-                }`}
+                  }`}
               >
                 <span className="h-6 w-1.5 bg-[var(--accent)] sm:h-8" />
                 {t.pricing.title}
@@ -701,11 +936,10 @@ export default function App() {
                   <div
                     key={row.route}
                     style={{ transitionDelay: `${idx * 45}ms` }}
-                    className={`flex items-center justify-between gap-4 rounded-full border-2 border-[var(--accent)] bg-black px-6 py-3 text-white transition-all duration-500 active:scale-[0.98] sm:px-8 sm:py-4 ${
-                      pricingVisible
+                    className={`flex items-center justify-between gap-4 rounded-full border-2 border-[var(--accent)] bg-black px-6 py-3 text-white transition-all duration-500 active:scale-[0.98] sm:px-8 sm:py-4 ${pricingVisible
                         ? "translate-x-0 opacity-100"
                         : "-translate-x-8 opacity-0"
-                    }`}
+                      }`}
                   >
                     <span className="font-display text-base font-semibold sm:text-xl">
                       {row.route}
@@ -731,11 +965,10 @@ export default function App() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="rounded-3xl bg-[var(--primary)] p-3 sm:p-6">
               <h2
-                className={`mb-4 flex items-center gap-3 px-1 font-display text-2xl font-bold text-white transition-all duration-700 sm:mb-6 sm:text-3xl ${
-                  fleetVisible
+                className={`mb-4 flex items-center gap-3 px-1 font-display text-2xl font-bold text-white transition-all duration-700 sm:mb-6 sm:text-3xl ${fleetVisible
                     ? "translate-y-0 opacity-100"
                     : "translate-y-6 opacity-0"
-                }`}
+                  }`}
               >
                 <span className="h-6 w-1.5 bg-[var(--accent)] sm:h-8" />
                 {t.fleet.title}
@@ -756,11 +989,10 @@ export default function App() {
                       }
                     }}
                     style={{ transitionDelay: `${i * 120}ms` }}
-                    className={`gradient-border cursor-pointer transition-all duration-700 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/70 ${
-                      fleetVisible
+                    className={`gradient-border cursor-pointer transition-all duration-700 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/70 ${fleetVisible
                         ? "translate-y-0 opacity-100"
                         : "translate-y-10 opacity-0"
-                    }`}
+                      }`}
                   >
                     <article className="relative isolate aspect-[4/3] min-w-0 overflow-hidden rounded-3xl bg-[var(--card)] @container sm:aspect-[16/10]">
                       {CARD_PHOTOS[i] ? (
@@ -817,11 +1049,11 @@ export default function App() {
           }}
           className="scroll-mt-20 relative overflow-hidden border-y border-[var(--border)] bg-black text-[var(--primary-foreground)]"
         >
+          <h2 className="sr-only">{t.nav.about}</h2>
           <div className="pointer-events-none absolute inset-0 z-20 flex items-center">
             <div
-              className={`flex items-center text-[var(--accent)] drop-shadow-[0_0_20px_rgba(249,115,22,0.45)] ${
-                aboutVisible ? "animate-tow-truck" : "opacity-0 -translate-x-full"
-              }`}
+              className={`flex items-center text-[var(--accent)] drop-shadow-[0_0_20px_rgba(249,115,22,0.45)] ${aboutVisible ? "animate-tow-truck" : "opacity-0 -translate-x-full"
+                }`}
             >
               <svg
                 aria-hidden="true"
@@ -873,11 +1105,9 @@ export default function App() {
               {t.stats.map((s, index) => (
                 <div
                   key={s.label}
-                  className={`px-4 text-center opacity-0 border-white/10 ${
-                    index % 2 === 0 ? "border-r" : "border-r-0"
-                  } ${index < 3 ? "md:border-r" : "md:border-r-0"} ${
-                    aboutVisible ? "animate-stat-reveal" : ""
-                  }`}
+                  className={`px-4 text-center opacity-0 border-white/10 ${index % 2 === 0 ? "border-r" : "border-r-0"
+                    } ${index < 3 ? "md:border-r" : "md:border-r-0"} ${aboutVisible ? "animate-stat-reveal" : ""
+                    }`}
                   style={{
                     animationDelay: `${0.45 + index * 0.45}s`,
                   }}
@@ -901,6 +1131,118 @@ export default function App() {
               carrier={carrier}
               onCarrierChange={handleCarrierChange}
             />
+          </div>
+        </section>
+
+        {/* ===== Блок 6: Запитання та відповіді (FAQ) ===== */}
+        <section id="faq" className="scroll-mt-20 pb-16 sm:pb-20">
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "FAQPage",
+                mainEntity: t.faq.items.map((item) => ({
+                  "@type": "Question",
+                  name: item.q,
+                  acceptedAnswer: {
+                    "@type": "Answer",
+                    text: [item.a, ...(item.points ?? []), item.note]
+                      .filter(Boolean)
+                      .join(" "),
+                  },
+                })),
+              }),
+            }}
+          />
+
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="rounded-3xl bg-[var(--primary)] p-4 sm:p-8">
+              <h2 className="mb-6 flex items-center gap-3 px-1 font-display text-2xl font-bold text-white sm:mb-8 sm:text-3xl">
+                <span className="h-6 w-1.5 bg-[var(--accent)] sm:h-8" />
+                {t.faq.title}
+              </h2>
+
+              <div className="mx-auto flex max-w-4xl flex-col gap-3">
+                {t.faq.items.map((item, idx) => {
+                  const isOpen = openFaqIndex === idx
+                  const btnId = `faq-btn-${idx}`
+                  const panelId = `faq-panel-${idx}`
+
+                  return (
+                    <div
+                      key={item.q}
+                      className={`overflow-hidden border transition-all duration-300 ${
+                        isOpen
+                          ? "rounded-2xl border-[var(--accent)] bg-zinc-900"
+                          : "rounded-[32px] border-white/10 bg-zinc-900/75 hover:border-white/25"
+                      }`}
+                    >
+                      <h3>
+                        <button
+                          id={btnId}
+                          type="button"
+                          aria-expanded={isOpen}
+                          aria-controls={panelId}
+                          onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
+                          className="flex w-full cursor-pointer items-center justify-between gap-4 px-5 py-4 text-left text-white sm:px-6 sm:py-5"
+                        >
+                          <span className="font-display text-base font-semibold sm:text-lg">
+                            {item.q}
+                          </span>
+                          <span
+                            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition-all duration-300 ${
+                              isOpen
+                                ? "rotate-45 border-[var(--accent)] bg-[var(--accent)] text-black"
+                                : "border-white/20 text-gray-300"
+                            }`}
+                          >
+                            <Plus className="h-4 w-4" aria-hidden="true" />
+                          </span>
+                        </button>
+                      </h3>
+
+                      <div
+                        id={panelId}
+                        role="region"
+                        aria-labelledby={btnId}
+                        className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${
+                          isOpen
+                            ? "grid-rows-[1fr] opacity-100"
+                            : "grid-rows-[0fr] opacity-0"
+                        }`}
+                      >
+                        <div className="overflow-hidden">
+                          <div className="border-t border-white/10 bg-black px-5 pb-5 pt-4 text-sm leading-relaxed text-gray-300 sm:px-6 sm:text-base">
+                            <p>{item.a}</p>
+
+                            {item.points && item.points.length > 0 && (
+                              <ul className="mt-3 space-y-2">
+                                {item.points.map((point) => (
+                                  <li
+                                    key={point}
+                                    className="flex items-start gap-2.5"
+                                  >
+                                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent)]" />
+                                    <span>{point}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+
+                            {item.note && (
+                              <p className="mt-3 text-xs text-gray-400 sm:text-sm">
+                                {item.note}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
           </div>
         </section>
       </main>
@@ -986,11 +1328,10 @@ export default function App() {
                       if (phoneError) setPhoneError("")
                     }}
                     placeholder={t.modal.phonePlaceholder}
-                    className={`h-14 w-full rounded-2xl border bg-black/50 px-4 text-lg font-semibold text-white placeholder-gray-500 transition-colors focus:outline-none ${
-                      phoneError
+                    className={`h-14 w-full rounded-2xl border bg-black/50 px-4 text-lg font-semibold text-white placeholder-gray-500 transition-colors focus:outline-none ${phoneError
                         ? "border-red-500 focus:border-red-500"
                         : "border-white/20 focus:border-[var(--accent)]"
-                    }`}
+                      }`}
                   />
                 </div>
                 {phoneError && (
@@ -1034,14 +1375,14 @@ export default function App() {
           </div>
 
           <nav aria-label="Social media" className="flex items-center gap-3">
-            {SOCIAL_LINKS.map(({ name, href, icon: Icon, hoverClass }) => (
+            {SOCIAL_LINKS.map(({ name, href, icon: Icon, hoverClass, activeClass }) => (
               <a
                 key={name}
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={name}
-                className={`flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] text-gray-700 transition-all hover:scale-110 active:scale-95 ${hoverClass}`}
+                className={`flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] text-gray-700 transition-all hover:scale-110 active:scale-95 ${hoverClass} ${activeClass}`}
               >
                 <Icon className="h-4 w-4" aria-hidden="true" />
               </a>
